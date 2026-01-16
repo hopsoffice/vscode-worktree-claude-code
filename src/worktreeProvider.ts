@@ -171,10 +171,54 @@ export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
                 }
             }
 
+            // 마지막 워크트리 추가 (빈 줄로 끝나지 않은 경우)
+            if (currentWorktree.path) {
+                worktrees.push({
+                    path: currentWorktree.path,
+                    branch: currentWorktree.branch || '',
+                    head: currentWorktree.head || '',
+                    isBare: currentWorktree.isBare || false
+                });
+            }
+
+            // 워크트리 목록이 비어있으면 루트 디렉토리 정보 추가
+            if (worktrees.length === 0) {
+                const rootBranch = await this.getCurrentBranch();
+                worktrees.push({
+                    path: this.gitRoot,
+                    branch: rootBranch,
+                    head: '',
+                    isBare: false
+                });
+            }
+
             return worktrees;
         } catch (error) {
             console.error('Git worktree list 실행 실패:', error);
-            return [];
+            // 에러가 발생해도 루트 디렉토리는 표시
+            const rootBranch = await this.getCurrentBranch();
+            return [{
+                path: this.gitRoot,
+                branch: rootBranch,
+                head: '',
+                isBare: false
+            }];
+        }
+    }
+
+    private async getCurrentBranch(): Promise<string> {
+        if (!this.gitRoot) {
+            return '';
+        }
+
+        try {
+            const { stdout } = await execAsync('git branch --show-current', {
+                cwd: this.gitRoot
+            });
+            return stdout.trim();
+        } catch (error) {
+            console.error('현재 브랜치를 가져올 수 없습니다:', error);
+            return '';
         }
     }
 

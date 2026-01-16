@@ -2,7 +2,8 @@
   "name": "vscode-worktree-claude-code",
   "displayName": "Git Worktree Manager with Claude Code",
   "description": "Git worktree 관리 및 Claude Code 작업 상태 표시",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "publisher": "kanghyojun",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -90,17 +91,19 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "pnpm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile",
-    "lint": "eslint src --ext ts"
+    "pretest": "pnpm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "pnpm install && vsce package --no-dependencies"
   },
   "devDependencies": {
     "@types/node": "^20.x",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.x",
     "@typescript-eslint/parser": "^6.x",
+    "@vscode/vsce": "^3.7.1",
     "eslint": "^8.x",
     "typescript": "^5.3.0"
   }
