@@ -1,0 +1,106 @@
+{
+  "name": "vscode-worktree-claude-code",
+  "displayName": "Git Worktree Manager with Claude Code",
+  "description": "Git worktree 관리 및 Claude Code 작업 상태 표시",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:worktreeExplorer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "worktree-explorer",
+          "title": "Git Worktree",
+          "icon": "$(list-tree)"
+        }
+      ]
+    },
+    "views": {
+      "worktree-explorer": [
+        {
+          "id": "worktreeExplorer",
+          "name": "Worktrees"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "worktree.add",
+        "title": "Worktree 추가",
+        "icon": "$(add)"
+      },
+      {
+        "command": "worktree.remove",
+        "title": "Worktree 삭제",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "worktree.openInNewWindow",
+        "title": "새 창에서 열기",
+        "icon": "$(window)"
+      },
+      {
+        "command": "worktree.openInCurrentWindow",
+        "title": "현재 창에서 열기",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "worktree.refresh",
+        "title": "새로고침",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "worktree.add",
+          "when": "view == worktreeExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "worktree.refresh",
+          "when": "view == worktreeExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "worktree.openInCurrentWindow",
+          "when": "view == worktreeExplorer && viewItem == worktree",
+          "group": "inline"
+        },
+        {
+          "command": "worktree.openInNewWindow",
+          "when": "view == worktreeExplorer && viewItem == worktree"
+        },
+        {
+          "command": "worktree.remove",
+          "when": "view == worktreeExplorer && viewItem == worktree"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.x",
+    "@typescript-eslint/parser": "^6.x",
+    "eslint": "^8.x",
+    "typescript": "^5.3.0"
+  }
+}

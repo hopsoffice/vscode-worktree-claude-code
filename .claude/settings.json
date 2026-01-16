@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd) && mkdir -p \"$WORKTREE_ROOT/.claude/progress\" && touch \"$WORKTREE_ROOT/.claude/progress/prompt-$(echo \"$WORKTREE_ROOT\" | md5sum | cut -d' ' -f1).lock\"",
+            "description": "프롬프트 입력 시 워크트리별 고유 락 파일 생성"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd) && touch \"$WORKTREE_ROOT/.claude/progress/prompt-$(echo \"$WORKTREE_ROOT\" | md5sum | cut -d' ' -f1).lock\" 2>/dev/null || true",
+            "description": "도구 사용 후 워크트리별 락 파일 타임스탬프 업데이트"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd) && rm -f \"$WORKTREE_ROOT/.claude/progress/prompt-$(echo \"$WORKTREE_ROOT\" | md5sum | cut -d' ' -f1).lock\"",
+            "description": "세션 종료 시 현재 워크트리의 락 파일 삭제"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "WORKTREE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd) && rm -f \"$WORKTREE_ROOT/.claude/progress/prompt-$(echo \"$WORKTREE_ROOT\" | md5sum | cut -d' ' -f1).lock\"",
+            "description": "중단 시 현재 워크트리의 락 파일 삭제"
+          }
+        ]
+      }
+    ]
+  }
+}
