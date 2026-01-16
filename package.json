@@ -79,7 +79,8 @@
         },
         {
           "command": "worktree.openInNewWindow",
-          "when": "view == worktreeExplorer && viewItem == worktree"
+          "when": "view == worktreeExplorer && viewItem == worktree",
+          "group": "inline"
         },
         {
           "command": "worktree.remove",
