@@ -264,33 +264,52 @@ export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
             return;
         }
 
+        // 1. 베이스 브랜치 선택
         const branches = await this.getBranches();
-
-        const selectedBranch = await vscode.window.showQuickPick(branches, {
-            placeHolder: '체크아웃할 브랜치를 선택하세요'
+        const targetBranch = await vscode.window.showQuickPick(branches, {
+            placeHolder: '시작할 브랜치를 선택하세요 (베이스 브랜치)'
         });
 
-        if (!selectedBranch) {
+        if (!targetBranch) {
             return;
         }
 
-        const worktreeName = await vscode.window.showInputBox({
-            prompt: 'Worktree 디렉토리 이름을 입력하세요',
-            value: selectedBranch.replace(/[^a-zA-Z0-9-_]/g, '-')
+        // 2. 새 브랜치 이름 입력
+        const newBranchName = await vscode.window.showInputBox({
+            prompt: '생성할 새 브랜치 이름을 입력하세요',
+            placeHolder: 'feature/my-feature',
+            validateInput: (value) => {
+                if (!value) {
+                    return '브랜치 이름을 입력해주세요';
+                }
+                if (!/^[a-zA-Z0-9/_-]+$/.test(value)) {
+                    return '브랜치 이름은 영문, 숫자, /, _, - 만 사용 가능합니다';
+                }
+                return null;
+            }
         });
 
-        if (!worktreeName) {
+        if (!newBranchName) {
             return;
         }
 
-        const worktreePath = path.join(path.dirname(this.gitRoot), worktreeName);
+        // 3. .worktrees 디렉토리 경로 생성
+        const rootDirName = path.basename(this.gitRoot);
+        const worktreesDir = path.join(path.dirname(this.gitRoot), `${rootDirName}.worktrees`);
+        const worktreePath = path.join(worktreesDir, newBranchName);
 
         try {
-            await execAsync(`git worktree add "${worktreePath}" "${selectedBranch}"`, {
+            // 4. .worktrees 디렉토리가 없으면 생성
+            if (!fs.existsSync(worktreesDir)) {
+                fs.mkdirSync(worktreesDir, { recursive: true });
+            }
+
+            // 5. git worktree add -b <new-branch> <path> <target-branch>
+            await execAsync(`git worktree add -b "${newBranchName}" "${worktreePath}" "${targetBranch}"`, {
                 cwd: this.gitRoot
             });
 
-            vscode.window.showInformationMessage(`Worktree '${worktreeName}'이(가) 생성되었습니다.`);
+            vscode.window.showInformationMessage(`Worktree '${newBranchName}'이(가) 생성되었습니다.`);
             this.refresh();
         } catch (error: any) {
             vscode.window.showErrorMessage(`Worktree 생성 실패: ${error.message}`);
