@@ -16,31 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.registerFileDecorationProvider(worktreeProvider.decorationProvider)
     );
 
-    // 더블클릭 감지를 위한 타이머
-    let lastClickTime = 0;
-    let lastClickedItem: any = null;
-    const DOUBLE_CLICK_THRESHOLD = 300; // 300ms
-
-    treeView.onDidChangeSelection(e => {
-        if (e.selection.length === 0) {
-            return;
-        }
-
-        const currentTime = Date.now();
-        const item = e.selection[0];
-
-        if (lastClickedItem === item && currentTime - lastClickTime < DOUBLE_CLICK_THRESHOLD) {
-            // 더블클릭 감지
-            worktreeProvider.openInNewWindow(item);
-            lastClickTime = 0;
-            lastClickedItem = null;
-        } else {
-            // 첫 번째 클릭
-            lastClickTime = currentTime;
-            lastClickedItem = item;
-        }
-    });
-
     context.subscriptions.push(treeView);
 
     context.subscriptions.push(

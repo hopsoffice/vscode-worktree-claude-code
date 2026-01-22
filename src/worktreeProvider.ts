@@ -384,13 +384,56 @@ export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
         }
     }
 
+    /**
+     * 워크트리 경로에서 가장 최근 수정된 워크스페이스 파일을 찾음
+     */
+    private findWorkspaceFile(worktreePath: string): string | null {
+        const vscodeDir = path.join(worktreePath, '.vscode');
+
+        if (!fs.existsSync(vscodeDir)) {
+            return null;
+        }
+
+        try {
+            const files = fs.readdirSync(vscodeDir);
+            const workspaceFiles = files.filter(f => f.endsWith('.code-workspace'));
+
+            if (workspaceFiles.length === 0) {
+                return null;
+            }
+
+            // 가장 최근 수정된 파일 찾기
+            let latestFile: string | null = null;
+            let latestMtime = 0;
+
+            for (const file of workspaceFiles) {
+                const filePath = path.join(vscodeDir, file);
+                const stats = fs.statSync(filePath);
+                if (stats.mtimeMs > latestMtime) {
+                    latestMtime = stats.mtimeMs;
+                    latestFile = filePath;
+                }
+            }
+
+            return latestFile;
+        } catch (error) {
+            return null;
+        }
+    }
+
     async openInNewWindow(item: WorktreeItem): Promise<void> {
-        const uri = vscode.Uri.file(item.path);
+        const workspaceFile = this.findWorkspaceFile(item.path);
+        const uri = workspaceFile
+            ? vscode.Uri.file(workspaceFile)
+            : vscode.Uri.file(item.path);
         await vscode.commands.executeCommand('vscode.openFolder', uri, true);
     }
 
     async openInCurrentWindow(item: WorktreeItem): Promise<void> {
-        const uri = vscode.Uri.file(item.path);
+        const workspaceFile = this.findWorkspaceFile(item.path);
+        const uri = workspaceFile
+            ? vscode.Uri.file(workspaceFile)
+            : vscode.Uri.file(item.path);
         await vscode.commands.executeCommand('vscode.openFolder', uri, false);
     }
 
