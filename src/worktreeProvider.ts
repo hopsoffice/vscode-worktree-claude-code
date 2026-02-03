@@ -121,10 +121,14 @@ export class WorktreeProvider implements vscode.TreeDataProvider<WorktreeItem> {
                 // DecorationProvider 업데이트
                 this.decorationProvider.setRunning(wt.path, isRunning);
 
+                const dirName = path.basename(wt.path);
+                const label = wt.branch || dirName;
+
                 return new WorktreeItem(
-                    wt.branch || path.basename(wt.path),
+                    label,
                     wt.path,
                     wt.branch,
+                    dirName,
                     isRunning,
                     currentPath === wt.path
                 );
@@ -449,13 +453,14 @@ class WorktreeItem extends vscode.TreeItem {
         public readonly label: string,
         public readonly path: string,
         public readonly branch: string,
+        private readonly dirName: string,
         private readonly isWorking: boolean,
         private readonly isCurrent: boolean
     ) {
         super(label, vscode.TreeItemCollapsibleState.None);
 
         this.tooltip = `${this.branch}\n${this.path}${this.isCurrent ? '\n(현재 워크트리)' : ''}`;
-        this.description = this.branch;
+        this.description = this.dirName;
         this.contextValue = 'worktree';
         this.resourceUri = vscode.Uri.file(this.path);
 
